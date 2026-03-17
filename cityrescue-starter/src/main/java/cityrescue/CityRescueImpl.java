@@ -230,7 +230,15 @@ public class CityRescueImpl implements CityRescue {
         }
         throw new CapacityExceededException("No free unit slot");
     }
-
+    /**
+     * removes a unit from the simulation. 
+     * a unti can only be removed if it is not at an incident or if it is not on the way to 
+     * an incident. 
+     * @param unitId the id of the unit to decommision
+     * @throws IDNOtRecognisedException if the unit id does not match any exsisting unit id. 
+     * @throws IllegalStateException if the unit is en route or at the scene of an incident. 
+     * 
+     */
     @Override
     public void decommissionUnit(int unitId) throws IDNotRecognisedException, IllegalStateException {
         Unit u = findUnitById(unitId);
@@ -246,7 +254,17 @@ public class CityRescueImpl implements CityRescue {
             }
         }
     }
-    
+    /**
+     * transfers a unit to a new home station. 
+     * The unit must be idle before it is transferred, the new sttion must 
+     * exsist, and the new station must have enough capacity for the unit. After the 
+     * transfer, the home statin id and current location are updated to the new station. 
+     * @param unitId the id of the unit to transfer
+     * @param newstationId the id of the new home station 
+     * @throws IDNotRecognisedException if the unit id or station id does not match an exsisting object. 
+     * @throws IllegalStateException if the unit is not idle or the new station is at max capacity. 
+     * 
+     */
     @Override
     public void transferUnit(int unitId, int newStationId) throws IDNotRecognisedException, IllegalStateException {
         Unit u = findUnitById(unitId);
@@ -264,7 +282,15 @@ public class CityRescueImpl implements CityRescue {
         u.setHomeStationId(newStationId);
         u.setLocation(newS.getX(), newS.getY());
     }
-
+    /**
+     * updates whether a unit is marked as out of service 
+     * a unit can only be out of service when it is idle and it can only be returned to normal
+     * service if it is currently marked as out of service. 
+     * @param unitId the id of the unit being updated
+     * @param outOfService true to mark the unit out of service, or false to return it to idle service. 
+     * @throws IDNotRecognisedException if the unit id does not match any unit. 
+     * @throws IllegalStateException if the new state is not valid for the units current state. 
+     */
     @Override
     public void setUnitOutOfService(int unitId, boolean outOfService) throws IDNotRecognisedException, IllegalStateException {
         Unit u = findUnitById(unitId);
@@ -277,7 +303,12 @@ public class CityRescueImpl implements CityRescue {
             u.setStatus(UnitStatus.IDLE);
         }
     }
-
+    /**
+     * returns the ids of all units in ascending order.
+     * the returned array contains the ids of every active unit currently stroed in the simulation
+     * , sorted from smallest to largest. 
+     * @return an array of active unit ids in ascending order
+     */
     @Override
     public int[] getUnitIds() {
         int[] ids = new int[unitCount];
@@ -297,7 +328,12 @@ public class CityRescueImpl implements CityRescue {
         }
         return ids;
     }
-
+    /**
+     * returns a description of a unit
+     * @param unitId the id of the unit to view
+     * @return a formatted string describing the unit
+     * @throws IDNotRecognisedException if the unit id does not match any unit. 
+     */
     @Override
     public String viewUnit(int unitId) throws IDNotRecognisedException {
         Unit u = findUnitById(unitId);
@@ -305,7 +341,20 @@ public class CityRescueImpl implements CityRescue {
         return formatUnit(u);
     }
     
-    //Incidents
+    
+    /**
+     * reports a new incident at the given location.
+     * the incident has a unique id and this is stored in the incident array. the severity must be between 1 and 5 and the
+     * location must be inside the map. Aswell as not being blocked by an obstacle. 
+     * @param type the type of incident being reported.
+     * @param severity the severity level of the incident 
+     * @param x the coordinate of the incident on the x axis
+     * @param y the coordinate of the incident on the y axis
+     * @return the id assigned to the new incident
+     * @throws InvalidSeverityException if severity is outside of 1-5
+     * @throws InvalidLocationException if the location is not on the map or is blocked
+     * @throws CapacityExceededException if the max number of incidents has been reached. 
+     */
     public int reportIncident(IncidentType type, int severity, int x, int y) throws InvalidSeverityException, InvalidLocationException {
         if (severity < 1 || severity > 5) throw new InvalidSeverityException("Severity must be 1-5");
         if (!map.isInBounds(x, y)) throw new InvalidLocationException("Out of bounds");
@@ -323,7 +372,14 @@ public class CityRescueImpl implements CityRescue {
         }
         throw new CapacityExceededException("No free incident slot");
     }
-
+    /**
+     * cancels an exsisting incident.
+     * the incident must not already be resolved or cancelled. if the incident has already been attended to, the assigned unit is released 
+     * and returned to idle status, and unassigned from the incident before the incident itself is cancelled. 
+     * @param incidentId the id of the incident to cancel 
+     * @throws IDNotRecognisedException if the incident id does not match any exsisiting incident
+     * @throws IllegalStateException if the incident has been solved already or already cancelled. 
+     */
     @Override
     public void cancelIncident(int incidentId) throws IDNotRecognisedException, IllegalStateException {
         Incident inc = findIncidentById(incidentId);
@@ -344,7 +400,14 @@ public class CityRescueImpl implements CityRescue {
         inc.setStatus(IncidentStatus.CANCELLED);
         inc.setUnitId(-1);
     }
-
+    /**
+     * updates the severity of an exsisting incident. 
+     * @param incidentId the id of the incident to escalate.
+     * @param newseverity the new severity of the incident
+     * @throws IDNotRecognisedException if the incident id does not match any exsisting incident. 
+     * @throws InvalidSeverityException if the new severity is outside the range 1-5
+     * @throws IllegalStateException if the incident has already been dealt with. 
+     */
     @Override
     public void escalateIncident(int incidentId, int newSeverity) throws IDNotRecognisedException, InvalidSeverityException, IllegalStateException {
         Incident inc = findIncidentById(incidentId);
@@ -355,7 +418,11 @@ public class CityRescueImpl implements CityRescue {
         }
         inc.setSeverity(newSeverity);
     }
-
+    /**
+     * returns the ids of all current incidents
+     * the returned array contains the ids of all incdients currently in the simulation in ascending order. 
+     * @return an array of active incident ids in ascending order. 
+     */
     @Override
     public int[] getIncidentIds() {
         int[] ids = new int[incidentCount];
@@ -375,7 +442,13 @@ public class CityRescueImpl implements CityRescue {
         }
         return ids;
     }
-
+    /**
+     * returns a description of an incident
+     * @param incidentId the id of the incident to view
+     * @return a formatted string describing the incident 
+     * @throws IDNotRecognisedException if the incident id does not match any exsisting incident
+     * 
+     */
     @Override
     public String viewIncident(int incidentId) throws IDNotRecognisedException {
         Incident inc = findIncidentById(incidentId);
@@ -383,7 +456,12 @@ public class CityRescueImpl implements CityRescue {
         return formatIncident(inc);
     }
 
-    //Sim
+    /**
+     * dispatches availble units to reported incidents 
+     * Incidents are checked in ascending id order, then for each reported incident, the most suited idle unit is chosen.
+     * they are chosen by shortest distance, then lowest unit id, lowest station id. Once a unit is chosen,
+     *  the unit is sent to the incident and its marked as dispatched. 
+     */
     @Override
     public void dispatch() {
         // Process incidents in ascending ID order
@@ -421,7 +499,11 @@ public class CityRescueImpl implements CityRescue {
             }
         }
     }
-
+    /**
+     * moves the simulation foward by 1 tick
+     * units move closer to incidetns, start work when they arrive, 
+     * this work reduces then they finish the incidents when the work reaches 0. 
+     */
     @Override
     public void tick() {
         tick++;
@@ -473,6 +555,11 @@ public class CityRescueImpl implements CityRescue {
             }
         }
     }
+    /**
+     * returns the current simulation state as a summary
+     * the tick number, map totals, incidents, and units are all returned as a string.
+     * @return a formatted string of the simulation 
+     */
     @Override
     public String getStatus() {
         StringBuilder sb = new StringBuilder();
@@ -497,27 +584,43 @@ public class CityRescueImpl implements CityRescue {
         return sb.toString();
     }
     //Helper Methods
+    /**
+     * finds a station by its ID
+     * @param id the station id to search for
+     * @return the matching station, or null if its not found
+     */
     private Station findStationById(int id) {
         for (Station s : stations) {
             if (s != null && s.getId() == id) return s;
         }
         return null;
     }
-
+    /**
+     * finds a unit by its ids
+     * @param id the unit id to search for
+     * @return the mathcing unit, or null if not found
+     */
     private Unit findUnitById(int id) {
         for (Unit u : units) {
             if (u != null && u.getId() == id) return u;
         }
         return null;
     }
-
+    /**
+     * finds an incident by its id
+     * @param id the incident id to search for
+     * @return the matching incident, or null if not found
+     */
     private Incident findIncidentById(int id) {
         for (Incident i : incidents) {
             if (i != null && i.getId() == id) return i;
         }
         return null;
     }
-
+    /**
+     * returns all active units sorted by id
+     * @return an array of active units 
+     */
     private Unit[] getUnitsSortedById() {
         Unit[] active = new Unit[unitCount];
         int idx = 0;
@@ -536,7 +639,12 @@ public class CityRescueImpl implements CityRescue {
         }
         return active;
     }
-
+    /**
+     * moves a unit towards its target. 
+     * the unit takes one step that reduces the distance between its target. if there isnt a option for this 
+     * it will then take first legal move in order.
+     * @param u the unit to move 
+     */
     private void moveUnit(Unit u) {
         int x = u.getX();
         int y = u.getY();
@@ -572,7 +680,10 @@ public class CityRescueImpl implements CityRescue {
         }
         // No legal move: stay put
     }
-
+    /**
+     * counts the blocked cells on the map
+     * @returnthe number of obstacles on the map 
+     */
     private int countObstacles() {
         int count = 0;
         for (int x = 0; x < map.getWidth(); x++) {
@@ -582,7 +693,11 @@ public class CityRescueImpl implements CityRescue {
         }
         return count;
     }
-
+    /**
+     * returns a description of a unit
+     * @param u the unit to describe 
+     * @return a string describing the unit
+     */
     private String formatUnit(Unit u) {
         // U#2 TYPE=FIRE_ENGINE HOME=2 LOC=(3,1) STATUS=AT_SCENE INCIDENT=1 WORK=2
         StringBuilder sb = new StringBuilder();
@@ -600,7 +715,11 @@ public class CityRescueImpl implements CityRescue {
         }
         return sb.toString();
     }
-
+    /**
+     * returns a description of an incident 
+     * @param inc the incident to describe 
+     * @returna a string describing the incident.
+     */
     private String formatIncident(Incident inc) {
         // I#1 TYPE=FIRE SEV=4 LOC=(3,1) STATUS=IN_PROGRESS UNIT=2
         StringBuilder sb = new StringBuilder();
