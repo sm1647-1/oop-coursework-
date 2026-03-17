@@ -3,7 +3,10 @@ package cityrescue;
 import cityrescue.Classes.*;
 import cityrescue.enums.*;
 import cityrescue.exceptions.*;
-
+/**
+ * This class implements the CityRescue simulation system. It stores the city map, stations, units, incidents as arrays.
+ * It also has ids assigned incrementally as new objects are added.
+ */
 public class CityRescueImpl implements CityRescue {
     //Constants
     private static final int MAX_STATIONS = 20;
@@ -30,6 +33,13 @@ public class CityRescueImpl implements CityRescue {
     private int incidentCount = 0;
 
     //__INIT__
+    /**
+     * Initialises the CityRescue simulation with a new map of the given size. 
+     * It resets the simulation state, including the tick counter, units , incidents, all stored stations and the id counters. 
+     * @param width the width of the city map
+     * @param height the height of the city map
+     * @throws InvalidGridException if the width or height is not positive 
+    */
     @Override
     public void initialise(int width, int height) throws InvalidGridException{
         if (width <= 0 || height <= 0) throw new InvalidGridException("Width and height must be positive");
@@ -45,24 +55,48 @@ public class CityRescueImpl implements CityRescue {
         unitCount = 0;
         incidentCount = 0;
     }
-
+    /**
+     * Returns the size of the city grid.
+     * @return an array containing the width and height of the map. 
+     */
     @Override
     public int[] getGridSize(){
         return new int[]{map.getWidth(), map.getHeight()};
     }
 
-    //Obstacles
+    /**
+     * adds an obstacle at the given map location. 
+     * the obstacles block movement through the given cell.
+     * @param x the coordinate of the obstacle on the x axis 
+     * @param y the coordinate of the obstacle on the y axis. 
+     * @throws InvalidLocationException if the location is outside the map or unavailable to be used as a map location. 
+     */
     @Override
     public void addObstacle(int x, int y) throws InvalidLocationException{
         map.addObstacle(x, y);
     }
-
+    /**
+     * rewmoves an abstacle from the map at a given location. 
+     * @param x the coorinate of the obstacle on the x axis that will be removed
+     * @param y the coorinate of the obstacle on the y axis that will be removed
+     * @throws InvalidLocationException if the location is outside the map or there is not a removeable obstacle at the location. 
+     */
     @Override
     public void removeObstacle(int x, int y) throws InvalidLocationException{
         map.removeObstacle(x, y);
     }
+    /**
+     * Adds a station to the simulation with an id and its stored i nthe first available slot in the station array. The station must be on the map, chosen coordinate not blocked 
+     * and the name cannot be blank. 
+     * @param name the name of the station 
+     * @param x the cooridnate of the station
+     * @param y the coordinate of the station 
+     * @return the id for the new station 
+     * @throws InvalidNameException if the stations name is blank. 
+     * @throws InvalidLocationException if the location is outsdie the map
+     * @throws CapacityExceededException if the max stations is reached
 
-    //Stations
+     */
     @Override
     public int addStation(String name, int x, int y) throws InvalidNameException, InvalidLocationException {
         if (name == null || name.trim().isEmpty()) throw new InvalidNameException("Name cannot be blank");
@@ -83,7 +117,13 @@ public class CityRescueImpl implements CityRescue {
         throw new CapacityExceededException("No free station slot"); // should not happen
     }
 
-
+    /**
+     * removes a station from the simulation. 
+     * its only able to be removed if no units currently have that station set as their home station. 
+     * @param stationId the id of the station to remove
+     * @throws IDNotRecognisedException if the station id deos nto match any station. 
+     * @throws IllegalStateException if their are still units assigned to a station. 
+     */
     @Override
     public void removeStation(int stationId) throws IDNotRecognisedException, IllegalStateException {
         Station s = findStationById(stationId);
@@ -103,7 +143,14 @@ public class CityRescueImpl implements CityRescue {
             }
         }
     }
-
+    /**
+     * sets the maximum unit capacity for a station 
+     * new capacity must be positive and larger than the current units assigned to that station. 
+     * @param stationID the id of the station which capacity will change
+     * @param maxUnits the new maximum number of units allowed at the station
+     * @throws IDNotrecognisedException if the station ID does nto match any station
+     * @throws InvalidCapacityException if the new station capacity is not positive or smaller than number of units assigned to it. 
+     */
     @Override
     public void setStationCapacity(int stationId, int maxUnits) throws IDNotRecognisedException, InvalidCapacityException {
         Station s = findStationById(stationId);
@@ -118,7 +165,11 @@ public class CityRescueImpl implements CityRescue {
         if (maxUnits < current) throw new InvalidCapacityException("New capacity too low for current units");
         s.setCapacity(maxUnits);
     }
-
+    /**
+     * returns the ids of all current stations. 
+     * The returned array has the id of evervy station in the simulation sorted in ascending order. 
+     * @return an array of station ids in ascending order
+     */
     @Override
     public int[] getStationIds() {
         int[] ids = new int[stationCount];
@@ -138,7 +189,18 @@ public class CityRescueImpl implements CityRescue {
         return ids;
     }
     
-    //Units
+    /**
+     * adds a new emergency unit to a station
+     * The station must have enough capacity spare to hold another unit, then a new unit id is assignedand the new unit subclass created depends on what 
+     * the supplied unti type was. 
+     * @param stationId the id of the station the unit will belong to.
+     * @param type the type of unit to create
+     * @return the id assigned to the new unit
+     * @throws IDNotRecognisedException if the station id does nto match any exsisting station 
+     * @throws InvalidUnitExceptino if the unit type is invalid
+     * @throws IllegalStateException if te station is already at max capacity
+     * @throws CapacityExceededException if the max number of units in the simulation has been reached. 
+     */
     @Override
     public int addUnit(int stationId, UnitType type) throws IDNotRecognisedException, InvalidUnitException, IllegalStateException {
         Station s = findStationById(stationId);
