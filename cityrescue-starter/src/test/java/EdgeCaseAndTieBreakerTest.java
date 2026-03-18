@@ -1,8 +1,11 @@
 package cityrescue;
+import cityrescue.CityRescue;
 import cityrescue.enums.*;
 import cityrescue.exceptions.*;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.beans.Transient;
 
 
 public class EdgeCaseAndTieBreakerTest {
@@ -48,5 +51,36 @@ public class EdgeCaseAndTieBreakerTest {
 
         assertTrue(incident.contains("UNIT=" + u1));
         assertFalse(incident.contains("UNIT=" + u2));
+    }
+    @Test
+    //tests that a station name needs a name
+    public void testBlankStationName() throws Exception {
+        CityRescue sim = new CityRescueImpl();
+        sim.initialise(5, 5);
+        try {
+            sim.addStation("", 1, 1);
+            fail("Expected InvalidNameException"); 
+        } catch (InvalidNameException e) {
+
+            }
+        }
+    @Test
+    // tests that a unit moves closer to an incident after one tick 
+    public void testTickSequencing() throws Exception {
+     CityRescue sim = new CityRescueImpl();
+    sim.initialise(10, 10);
+    int stationId = sim.addStation("station1", 0, 0);
+    int unitId = sim.addUnit(stationId, UnitType.FIRE_ENGINE);
+    int incidentId = sim.reportIncident(IncidentType.FIRE, 3, 2, 0);
+
+    sim.dispatch();
+    sim.tick();
+
+    String unit = sim.viewUnit(unitId);
+    String incident = sim.viewIncident(incidentId);
+
+    assertTrue(unit.contains("LOC=(1,0)") || unit.contains("LOC=(2,0)"));
+    assertTrue(incident.contains("UNIT=" + unitId));
+    
     }
 }
