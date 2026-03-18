@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class EdgeCaseAndTieBreakerTest {
     @Test
+    // tests that invalid grid sizes are rejected
     public void testInvalidGridSize() {
         CityRescue sim = new CityRescueImpl();
         try{
@@ -17,6 +18,7 @@ public class EdgeCaseAndTieBreakerTest {
         }
     }
     @Test
+    //tests that a station cannot be added on a blocked location
     public void testBlockedStationLocation() throws Exception {
         CityRescue sim = new CityRescueImpl();
         sim.initialise(5, 5);
@@ -29,6 +31,7 @@ public class EdgeCaseAndTieBreakerTest {
         }
     }
     @Test
+    //tests that the nearest suitable unit is chosen
     public void testNearestUnitChosen() throws Exception {
         CityRescue sim = new CityRescueImpl();
         sim.initialise(10, 10);
