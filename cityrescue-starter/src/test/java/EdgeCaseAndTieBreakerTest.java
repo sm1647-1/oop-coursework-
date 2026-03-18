@@ -44,6 +44,6 @@ public class EdgeCaseAndTieBreakerTest {
         String incident = sim.viewIncident(incidentId);
 
         assertTrue(incident.contains("Unit=" + u1));
-        assertTrue(incident.contains("Unit=" + u2));
+        assertFalse(incident.contains("Unit=" + u2));
     }
 }
