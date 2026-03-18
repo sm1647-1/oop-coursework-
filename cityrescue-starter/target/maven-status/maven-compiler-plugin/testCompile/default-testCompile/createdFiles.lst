@@ -1,5 +1,5 @@
-cityrescue/OwnTesting.class
 PublicBasicsTest.class
+cityrescue/EdgeCaseAndTieBreakerTest.class
 PublicOutputFormatTest.class
 PublicDispatchTest.class
 PublicTickLifecycleTest.class

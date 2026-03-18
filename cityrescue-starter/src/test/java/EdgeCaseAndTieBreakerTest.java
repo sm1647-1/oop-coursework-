@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class EdgeCaseAndTieBreakerTest {
     @Test
-    public void testInvlaidGridSize() {
+    public void testInvalidGridSize() {
         CityRescue sim = new CityRescueImpl();
         try{
             sim.initialise(0, 5);
