@@ -32,13 +32,13 @@ public class EdgeCaseAndTieBreakerTest {
     public void testLowestIDWhenTieBreak() throws Exception {
         CityRescue sim = new CityRescueImpl();
         sim.initialise(10, 10);
-        int s1 = sim.addStation("A", 0, 1);
-        int s2 = sim.addStation("B", 2, 1);
+        int s1 = sim.addStation("A", 0, 0);
+        int s2 = sim.addStation("B", 8, 8);
 
         int u1 = sim.addUnit(s1, UnitType.FIRE_ENGINE);
         int u2 = sim.addUnit(s2, UnitType.FIRE_ENGINE);
 
-        int incidentId = sim.reportIncident(IncidentType.FIRE, 3, 1, 1);
+        int incidentId = sim.reportIncident(IncidentType.FIRE, 3, 1, 0);
 
         sim.dispatch();
         String incident = sim.viewIncident(incidentId);
