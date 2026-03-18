@@ -29,7 +29,7 @@ public class EdgeCaseAndTieBreakerTest {
         }
     }
     @Test
-    public void testLowestIDWhenTieBreak() throws Exception {
+    public void testNearestUnitChosen() throws Exception {
         CityRescue sim = new CityRescueImpl();
         sim.initialise(10, 10);
         int s1 = sim.addStation("A", 0, 0);
@@ -43,7 +43,7 @@ public class EdgeCaseAndTieBreakerTest {
         sim.dispatch();
         String incident = sim.viewIncident(incidentId);
 
-        assertTrue(incident.contains("Unit=" + u1));
-        assertFalse(incident.contains("Unit=" + u2));
+        assertTrue(incident.contains("UNIT=" + u1));
+        assertFalse(incident.contains("UNIT=" + u2));
     }
 }
